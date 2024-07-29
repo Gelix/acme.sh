@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/bash
 
 # Script to deploy certificates to Palo Alto Networks PANOS via API
 # Note PANOS API KEY and IP address needs to be set prior to running.
@@ -8,7 +8,7 @@
 # Firewall admin with superuser and IP address is required.
 #
 # REQURED:
-#     export PANOS_HOST=""
+#     export PANOS_HOST="host1 host2"  support multiple servers    
 #     export PANOS_USER=""    #User *MUST* have Commit and Import Permissions in XML API for Admin Role
 #     export PANOS_PASS=""
 #
@@ -190,12 +190,20 @@ panos_deploy() {
     _debug "Attempting to load variable PANOS_TEMPLATE from file."
     _getdeployconf PANOS_TEMPLATE
   fi
-
   #Store variables
-  _panos_host=$PANOS_HOST
   _panos_user=$PANOS_USER
   _panos_pass=$PANOS_PASS
   _panos_template=$PANOS_TEMPLATE
+  _deploy_panos_hosts="$PANOS_HOST"
+  for PANOS_HOST in $_deploy_panos_hosts; do
+    _panos_deploy
+  done
+
+}
+
+_panos_deploy() {
+  
+  _panos_host=$PANOS_HOST
 
   #Test API Key if found.  If the key is invalid, the variable _panos_key will be unset.
   if [ "$_panos_host" ] && [ "$_panos_key" ]; then
